@@ -81,6 +81,18 @@ def generate_briefing_data(city: str) -> dict:
     raw_trivia = get_random_trivia(city)
     raw_advice = get_random_advice()
 
+    # ====== 新增：在終端機印出所有 Tool 的原始結果 ======
+    print("\n" + "="*50)
+    print(f"[*] [Agent 啟動] 開始收集 {city} 的資料...")
+    print(f"[*] [天氣 Tool]: \n{raw_weather}")
+    print(f"[*] [景點 Tool]: \n{raw_attractions}")
+    print(f"[*] [美食 Tool]: \n{raw_food}")
+    print(f"[*] [穿搭 Tool]: \n{raw_outfit}")
+    print(f"[*] [活動 Tool]: \n{raw_activity}")
+    print(f"[*] [冷知識 Tool]: \n{raw_trivia}")
+    print(f"[*] [格言 Tool]: \n{raw_advice}")
+    print("="*50 + "\n")
+
     # 2. 如果沒有設定好 LLM 或是 Key 不正確，退回原本直接顯示的行為
     llm = get_llm()
     if not llm:
@@ -97,7 +109,7 @@ def generate_briefing_data(city: str) -> dict:
         }
 
     prompt = f"""
-你是一位簡潔、幽默且專業的當地旅遊嚮導。請根據以下原始資料，為即將前往「{city}」的旅客撰寫一份精簡的行前簡報。
+你是一位專業的當地旅遊嚮導。請「嚴格基於」以下提供的原始資料，為前往「{city}」的旅客撰寫一份精簡的行前簡報。
 
 [原始資料]
 城市: {city}
@@ -110,23 +122,24 @@ def generate_briefing_data(city: str) -> dict:
 格言: {raw_advice}
 
 [重要規則]
-1. 全部使用繁體中文（專有名詞可保留英文）。
-2. 每個欄位最多 2~3 句話，保持精簡有力，不要長篇大論。
-3. 如果原始資料是英文或很隨機，請巧妙結合「{city}」的在地情境改寫。
-4. 如果欄位標註「尚未實作」，請直接推薦 3 項該城市的真實資訊（用短列點）。
-5. 調性：親切、有活力、像朋友出發前的叮嚀。
+1. 全部使用繁體中文（專有名詞可保留原文）。
+2. 每段最多 2~3 句話，保持精簡。
+3. **絕不可捏造**、自行發明原始資料中「沒有提到」的景點、美食或天氣。你只能對「已有的資料」進行潤飾與翻譯。
+4. 如果某個原始資料欄位顯示找不到資訊，請直接在 JSON 中回傳「查無相關資訊」。
+5. **【穿搭例外規則】**：如果「穿搭 (outfit)」資料查無資訊，請你根據「天氣 (weather)」資料中的氣溫與狀況，發揮常識給出合理的衣著建議。
+6. 如果抓到的隨機活動或格言看起來很奇怪，請簡單包裝，不可憑空虛構。
 
 [輸出格式]
 回傳純 JSON（不要加 ```json 標記），包含以下 Key：
 {{
   "city": "{city}",
-  "weather": "簡短天氣摘要",
-  "attractions": "3個必去景點（短列點）",
-  "food": "3道必吃美食（短列點）",
-  "outfit": "簡短穿搭建議",
-  "activity": "一項在地化活動建議",
-  "trivia": "一則有趣的在地冷知識",
-  "advice": "一句旅行格言"
+  "weather": "天氣與溫度摘要（基於原始資料）",
+  "attractions": "3個景點清單（基於原始資料）",
+  "food": "3道美食清單（基於原始資料）",
+  "outfit": "穿搭建議（基於原始資料）",
+  "activity": "在地活動（基於原始資料）",
+  "trivia": "在地冷知識（基於原始資料）",
+  "advice": "旅行格言（基於原始資料）"
 }}
 """
 
