@@ -15,11 +15,9 @@ except ImportError:
     get_weather = lambda city: f"（尚未實作 weather_tool）"
 
 try:
-    from tools.search_tool import search_attractions, search_food, search_outfit
+    from tools.search_tool import search_attractions
 except ImportError:
     search_attractions = lambda city: f"（尚未實作 search_tool）"
-    search_food = lambda city: f"（尚未實作 search_tool）"
-    search_outfit = lambda city: f"（尚未實作 search_tool）"
 
 try:
     from tools.bored_tool import get_random_activity
@@ -58,9 +56,7 @@ def generate_briefing(city: str) -> str:
     return f"""
 ## 🎒 {city} 專屬行前簡報
 ### 🌤️ 天氣：{d.get('weather', '')}
-### 👗 穿搭：{d.get('outfit', '')}
 ### 📸 景點：{d.get('attractions', '')}
-### 🍜 美食：{d.get('food', '')}
 ### 🎯 活動：{d.get('activity', '')}
 ### 🧠 冷知識：{d.get('trivia', '')}
 ### 💬 格言：{d.get('advice', '')}
@@ -75,8 +71,6 @@ def generate_briefing_data(city: str) -> dict:
     # 1. 取得原始資料
     raw_weather = get_weather(city)
     raw_attractions = search_attractions(city)
-    raw_food = search_food(city)
-    raw_outfit = search_outfit(city)
     raw_activity = get_random_activity()
     raw_trivia = get_random_trivia(city)
     raw_advice = get_random_advice()
@@ -86,8 +80,6 @@ def generate_briefing_data(city: str) -> dict:
     print(f"[*] [Agent 啟動] 開始收集 {city} 的資料...")
     print(f"[*] [天氣 Tool]: \n{raw_weather}")
     print(f"[*] [景點 Tool]: \n{raw_attractions}")
-    print(f"[*] [美食 Tool]: \n{raw_food}")
-    print(f"[*] [穿搭 Tool]: \n{raw_outfit}")
     print(f"[*] [活動 Tool]: \n{raw_activity}")
     print(f"[*] [冷知識 Tool]: \n{raw_trivia}")
     print(f"[*] [格言 Tool]: \n{raw_advice}")
@@ -101,8 +93,6 @@ def generate_briefing_data(city: str) -> dict:
             "city": city,
             "weather": raw_weather,
             "attractions": raw_attractions,
-            "food": raw_food,
-            "outfit": raw_outfit,
             "activity": raw_activity,
             "trivia": raw_trivia,
             "advice": raw_advice,
@@ -115,8 +105,6 @@ def generate_briefing_data(city: str) -> dict:
 城市: {city}
 天氣: {raw_weather}
 景點: {raw_attractions}
-美食: {raw_food}
-穿搭: {raw_outfit}
 活動: {raw_activity}
 冷知識: {raw_trivia}
 格言: {raw_advice}
@@ -125,8 +113,8 @@ def generate_briefing_data(city: str) -> dict:
 1. 全部使用繁體中文（專有名詞可保留原文）。
 2. 每段最多 2~3 句話，保持精簡。
 3. **【防幻覺與保底機制】**：
-   - 情況 A：如果原始資料有內容，你**絕不可捏造**或自行發明沒提到的景點與美食，只能對「已有的資料」進行潤飾與在地化翻譯。
-   - 情況 B (大腦保底)：如果「景點 (attractions)」、「美食 (food)」或「穿搭 (outfit)」的原始資料顯示找不到資訊，請**允許啟動大腦保底機制**，直接依賴你內建的豐富知識庫，給出該城市最經典、最推薦的 3 個景點或美食，以及合理的穿搭建議。
+   - 情況 A：如果原始資料有內容，你**絕不可捏造**或自行發明沒提到的景點，只能對「已有的資料」進行潤飾與在地化翻譯。
+   - 情況 B (大腦保底)：如果「景點 (attractions)」的原始資料顯示找不到資訊，請**允許啟動大腦保底機制**，直接依賴你內建的豐富知識庫，給出該城市最經典、最推薦的 3 個景點。
 4. 如果是「活動 (activity)」、「冷知識 (trivia)」或「格言 (advice)」查無資訊，請直接填寫「查無相關資訊」，不需觸發大腦保底。
 5. 如果抓到的隨機活動或格言看起來很奇怪，請簡單包裝，不可憑空虛構。
 
@@ -136,8 +124,6 @@ def generate_briefing_data(city: str) -> dict:
   "city": "{city}",
   "weather": "天氣與溫度摘要（基於原始資料）",
   "attractions": "3個景點清單（基於原始資料）",
-  "food": "3道美食清單（基於原始資料）",
-  "outfit": "穿搭建議（基於原始資料）",
   "activity": "在地活動（基於原始資料）",
   "trivia": "在地冷知識（基於原始資料）",
   "advice": "旅行格言（基於原始資料）"
@@ -165,8 +151,6 @@ def generate_briefing_data(city: str) -> dict:
             "city": city,
             "weather": raw_weather,
             "attractions": raw_attractions,
-            "food": raw_food,
-            "outfit": raw_outfit,
             "activity": raw_activity,
             "trivia": raw_trivia,
             "advice": raw_advice,

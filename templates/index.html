@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>旅遊前哨站 — 你的行前簡報 Agent</title>
-  <meta name="description" content="輸入你想去的城市，AI Agent 立刻為你產出天氣、景點、美食、穿搭的完整行前簡報！" />
+  <meta name="description" content="輸入你想去的城市，AI Agent 立刻為你產出天氣、景點與熱門活動的完整行前簡報！" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
@@ -184,9 +184,7 @@
 
     /* Left accent colors */
     .card[data-type="weather"]     { border-left-color: var(--yellow); }
-    .card[data-type="outfit"]      { border-left-color: var(--teal); }
     .card[data-type="attractions"] { border-left-color: var(--orange); }
-    .card[data-type="food"]        { border-left-color: var(--red); }
     .card[data-type="activity"]    { border-left-color: var(--teal); }
     .card[data-type="trivia"]      { border-left-color: var(--yellow); }
     .card[data-type="advice"] {
@@ -287,7 +285,7 @@
   <!-- Header -->
   <header>
     <div class="logo"><span class="icon">✈️</span>旅遊前哨站</div>
-    <p class="tagline">輸入城市名稱，AI Agent 即時整合天氣、景點、美食與穿搭，一鍵產出行前簡報</p>
+    <p class="tagline">輸入城市名稱，AI Agent 即時整合天氣、景點與在地活動，一鍵產出行前簡報</p>
   </header>
 
   <div class="color-bar">
@@ -325,9 +323,7 @@
 
   const CARD_META = [
     { key: 'weather',     icon: '☀️', label: '即時天氣' },
-    { key: 'outfit',      icon: '👕', label: '穿搭建議' },
     { key: 'attractions', icon: '📍', label: '熱門景點' },
-    { key: 'food',        icon: '🍽️', label: '當地美食' },
     { key: 'activity',    icon: '🎯', label: '活動建議' },
     { key: 'trivia',      icon: '💡', label: '旅遊冷知識' },
     { key: 'advice',      icon: '💬', label: '旅行格言' },
