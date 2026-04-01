@@ -1,0 +1,7 @@
+streamlit>=1.30.0
+requests
+duckduckgo-search
+python-dotenv
+langchain
+langchain-core
+langchain-google-genai
