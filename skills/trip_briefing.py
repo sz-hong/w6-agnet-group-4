@@ -25,7 +25,7 @@ except ImportError:
 try:
     from tools.trivia_tool import get_random_trivia
 except ImportError:
-    get_random_trivia = lambda: "（尚未實作 trivia_tool 取得冷知識）"
+    get_random_trivia = lambda city: "（尚未實作 trivia_tool 取得冷知識）"
 
 try:
     from tools.advice_tool import get_random_advice
@@ -45,7 +45,7 @@ def generate_briefing(city: str) -> str:
     outfit_info = search_outfit(city)
     
     activity = get_random_activity()
-    trivia = get_random_trivia()
+    trivia = get_random_trivia(city)
     advice = get_random_advice()
     
     # 組合 Markdown 字串
