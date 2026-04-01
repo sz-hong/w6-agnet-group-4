@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>旅遊前哨站 — 你的行前簡報 Agent</title>
+  <meta name="description" content="輸入你想去的城市，AI Agent 立刻為你產出天氣、景點、美食、穿搭的完整行前簡報！" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #F5EFE0;
+      --bg-card: #ffffff;
+      --bg-card-hover: #fffdf8;
+      --border: #e8dcc8;
+      --text: #2c2c2c;
+      --text-secondary: #555555;
+      --text-muted: #999;
+      --teal: #23B99A;
+      --red: #E74C3B;
+      --orange: #E67E25;
+      --yellow: #F0C418;
+      --teal-light: rgba(35, 185, 154, .1);
+      --red-light: rgba(231, 76, 59, .08);
+      --orange-light: rgba(230, 126, 37, .08);
+      --yellow-light: rgba(240, 196, 24, .1);
+      --shadow: 0 2px 12px rgba(0,0,0,.06);
+      --shadow-hover: 0 4px 20px rgba(0,0,0,.1);
+      --font: 'Inter', 'Noto Sans TC', sans-serif;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: .25s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ===================== Layout ===================== */
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+    }
+
+    /* ===================== Header ===================== */
+    header {
+      text-align: center;
+      padding: 3rem 0 .5rem;
+    }
+    .logo {
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: var(--teal);
+      letter-spacing: -1px;
+    }
+    .logo .icon { margin-right: .15rem; }
+    .tagline {
+      color: var(--text-muted);
+      font-size: .92rem;
+      max-width: 420px;
+      margin: .35rem auto 0;
+    }
+
+    /* colour bar decoration under header */
+    .color-bar {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin: 1.2rem 0 2rem;
+    }
+    .color-bar span {
+      width: 28px; height: 5px;
+      border-radius: 99px;
+    }
+    .color-bar span:nth-child(1) { background: var(--teal); width: 40px; }
+    .color-bar span:nth-child(2) { background: var(--yellow); }
+    .color-bar span:nth-child(3) { background: var(--orange); }
+    .color-bar span:nth-child(4) { background: var(--red); }
+
+    /* ===================== Search ===================== */
+    .search-section { max-width: 520px; margin: 0 auto; }
+    .search-box {
+      display: flex;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      overflow: hidden;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .search-box:focus-within {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 4px var(--teal-light);
+    }
+    .search-box input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: .85rem 1.4rem;
+      font-size: .95rem;
+      color: var(--text);
+      font-family: var(--font);
+      outline: none;
+    }
+    .search-box input::placeholder { color: #bbb; }
+    .search-box button {
+      border: none;
+      background: var(--teal);
+      color: #fff;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: .9rem;
+      padding: 0 1.8rem;
+      cursor: pointer;
+      transition: background var(--transition), transform .1s;
+      white-space: nowrap;
+    }
+    .search-box button:hover { background: #1ca888; }
+    .search-box button:active { transform: scale(.97); }
+    .search-box button.loading { pointer-events: none; opacity: .6; }
+
+    /* ===================== Status ===================== */
+    .status-msg {
+      text-align: center;
+      margin-top: .7rem;
+      font-size: .85rem;
+      font-weight: 500;
+      min-height: 1.2rem;
+    }
+    .status-msg.error { color: var(--red); }
+    .status-msg.info  { color: var(--teal); }
+
+    /* ===================== Results ===================== */
+    .result-area {
+      margin-top: 2rem;
+      display: none;
+    }
+    .result-area.show { display: block; }
+
+    .city-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 1.3rem;
+      color: var(--text);
+    }
+    .city-title .emoji { margin-right: .3rem; }
+
+    /* ===================== Cards ===================== */
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.3rem;
+      box-shadow: var(--shadow);
+      transition: box-shadow var(--transition), transform var(--transition);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: cardIn .3s ease forwards;
+      border-left: 4px solid transparent;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Left accent colors */
+    .card[data-type="weather"]     { border-left-color: var(--yellow); }
+    .card[data-type="outfit"]      { border-left-color: var(--teal); }
+    .card[data-type="attractions"] { border-left-color: var(--orange); }
+    .card[data-type="food"]        { border-left-color: var(--red); }
+    .card[data-type="activity"]    { border-left-color: var(--teal); }
+    .card[data-type="trivia"]      { border-left-color: var(--yellow); }
+    .card[data-type="advice"] {
+      border-left-color: transparent;
+      border: 2px solid var(--teal);
+      background: var(--teal-light);
+      text-align: center;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .card-icon { font-size: 1.25rem; flex-shrink: 0; }
+    .card-label {
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+    }
+    .card-toggle {
+      font-size: .7rem;
+      color: var(--text-muted);
+      transition: transform var(--transition);
+    }
+    .card.collapsed .card-toggle { transform: rotate(-90deg); }
+
+    .card-body {
+      margin-top: .55rem;
+      font-size: .88rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      white-space: pre-line;
+      overflow: hidden;
+      transition: max-height .35s ease, opacity .25s ease;
+    }
+    .card.collapsed .card-body {
+      max-height: 0 !important;
+      opacity: 0;
+      margin-top: 0;
+    }
+
+    .card[data-type="advice"] .card-body {
+      font-size: .95rem;
+      font-weight: 500;
+      color: var(--teal);
+      font-style: italic;
+    }
+
+    /* Stagger */
+    .card:nth-child(1) { animation-delay: .03s; }
+    .card:nth-child(2) { animation-delay: .07s; }
+    .card:nth-child(3) { animation-delay: .11s; }
+    .card:nth-child(4) { animation-delay: .15s; }
+    .card:nth-child(5) { animation-delay: .19s; }
+    .card:nth-child(6) { animation-delay: .23s; }
+    .card:nth-child(7) { animation-delay: .27s; }
+
+    /* ===================== Spinner ===================== */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2.5px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .5s linear infinite;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===================== Footer ===================== */
+    footer {
+      text-align: center;
+      padding: 2.5rem 0 1rem;
+      color: var(--text-muted);
+      font-size: .78rem;
+    }
+    footer a { color: var(--teal); text-decoration: none; font-weight: 600; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ===================== Responsive ===================== */
+    @media (max-width: 560px) {
+      .logo { font-size: 2rem; }
+      .search-box { flex-direction: column; border-radius: var(--radius-sm); }
+      .search-box input { padding: .85rem 1rem; }
+      .search-box button { padding: .75rem; border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="logo"><span class="icon">✈️</span>旅遊前哨站</div>
+    <p class="tagline">輸入城市名稱，AI Agent 即時整合天氣、景點、美食與穿搭，一鍵產出行前簡報</p>
+  </header>
+
+  <div class="color-bar">
+    <span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- Search -->
+  <div class="search-section">
+    <form class="search-box" id="searchForm">
+      <input type="text" id="cityInput" placeholder="例如 Tokyo、Taipei、Paris …" autocomplete="off" />
+      <button type="submit" id="searchBtn">🚀 產生簡報</button>
+    </form>
+  </div>
+  <div class="status-msg" id="statusMsg"></div>
+
+  <!-- Results -->
+  <section class="result-area" id="resultArea">
+    <div class="city-title" id="cityTitle"></div>
+    <div class="cards" id="cardsGrid"></div>
+  </section>
+
+  <footer>
+    Made with ❤️ by 旅遊前哨站 Team — <a href="https://github.com/sz-hong/w6-agnet-group-4" target="_blank">GitHub Repo</a>
+  </footer>
+</div>
+
+<script>
+  const form      = document.getElementById('searchForm');
+  const input     = document.getElementById('cityInput');
+  const btn       = document.getElementById('searchBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const resultArea= document.getElementById('resultArea');
+  const cityTitle = document.getElementById('cityTitle');
+  const cardsGrid = document.getElementById('cardsGrid');
+
+  const CARD_META = [
+    { key: 'weather',     icon: '☀️', label: '即時天氣' },
+    { key: 'outfit',      icon: '👕', label: '穿搭建議' },
+    { key: 'attractions', icon: '📍', label: '熱門景點' },
+    { key: 'food',        icon: '🍽️', label: '當地美食' },
+    { key: 'activity',    icon: '🎯', label: '活動建議' },
+    { key: 'trivia',      icon: '💡', label: '旅遊冷知識' },
+    { key: 'advice',      icon: '💬', label: '旅行格言' },
+  ];
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const city = input.value.trim();
+    if (!city) { showStatus('請先輸入城市名稱', 'error'); return; }
+    showStatus('', '');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/briefing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ city })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        showStatus(err.error || '伺服器發生錯誤', 'error');
+        setLoading(false);
+        return;
+      }
+      const data = await res.json();
+      renderCards(data);
+      showStatus('簡報產生完成 🎉', 'info');
+    } catch (err) {
+      showStatus('無法連線至伺服器', 'error');
+    }
+    setLoading(false);
+  });
+
+  function renderCards(data) {
+    cityTitle.innerHTML = `<span class="emoji">🎒</span>${data.city} — 行前簡報`;
+    cardsGrid.innerHTML = '';
+
+    CARD_META.forEach(({ key, icon, label }) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.setAttribute('data-type', key);
+
+      let raw = data[key] || '（資料載入中…）';
+      if (Array.isArray(raw)) raw = raw.join('\n');
+      const content = escapeHtml(String(raw));
+
+      card.innerHTML = `
+        <div class="card-header" onclick="this.parentElement.classList.toggle('collapsed')">
+          <span class="card-icon">${icon}</span>
+          <span class="card-label">${label}</span>
+          <span class="card-toggle">▼</span>
+        </div>
+        <div class="card-body">${content}</div>
+      `;
+      cardsGrid.appendChild(card);
+    });
+
+    resultArea.classList.add('show');
+    resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function showStatus(msg, type) {
+    statusMsg.textContent = msg;
+    statusMsg.className = 'status-msg ' + (type || '');
+  }
+  function setLoading(on) {
+    if (on) {
+      btn.classList.add('loading');
+      btn.innerHTML = '<span class="spinner"></span>整理中…';
+    } else {
+      btn.classList.remove('loading');
+      btn.textContent = '🚀 產生簡報';
+    }
+  }
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+</script>
+</body>
+</html>

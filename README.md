@@ -1,13 +1,13 @@
 # AI agent 開發分組實作
 
 > 課程：AI agent 開發 — Tool 與 Skill
-> 主題： 旅遊前哨站 / 偵探事務所 / 生活顧問
+> 主題： 旅遊前哨站
 
 ---
 
 ## Agent 功能總覽
 
-> 這個 Agent 是一個「旅遊前哨站」，它可以協助使用者在出發前取得目的地的全方位資訊。使用者只需輸入想去的城市，即可取得一份包含天氣、穿搭、景點、美食與旅遊建議的完整行前簡報。
+> 這個 Agent 是一個「旅遊前哨站」，它可以協助使用者在出發前取得目的地的全方位資訊。使用者只需輸入想去的城市，我們的預處理 Tools 將抓取所有必要的 API，並交給 **Gemini 大模型** 進行在地化翻譯、潤飾與統整，最後於網頁端呈現一份流暢的中文行前簡報。
 
 | 使用者輸入   | Agent 行為                             | 負責組員 |
 | ------------ | -------------------------------------- | -------- |
@@ -16,25 +16,26 @@
 | （例：建議） | 呼叫 advice_tool，取得隨機旅行建議     |          |
 | （例：活動） | 呼叫 bored_tool，取得打發時間的活動    |          |
 | （例：知識） | 呼叫 trivia_tool，取得旅遊冷知識       |          |
-| （例：出發） | 執行 trip_briefing Skill，產出行前簡報 |          |
+| （大腦綜合） | 送入 Gemini 模型進行翻譯與在地化推薦   |          |
+| （前端顯示） | 透過 Flask API 渲染至專屬網頁介面      | sz-hong  |
 
 ---
 
 ## 組員與分工
 
-| 姓名 | 負責功能           | 檔案                  | 使用的 API                           |
+| 姓名 | 負責功能           | 檔案                  | 使用的技術 / API                       |
 | ---- | ----------------- | --------------------- | ------------------------------------ |
 |      | weather_tool      | `tools/weather_tool.py` | `wttr.in`                          |
 |      | search_tool       | `tools/search_tool.py`  | DuckDuckGo Search API                |
 |      | bored/trivia/advice | `tools/*.py`          | Bored/UselessFacts/Advice API        |
-|      | Skill 整合         | `skills/trip_briefing.py` | —                                    |
-|      | Agent 主程式       | `main.py`             | Streamlit Web UI                     |
+|      | Skill 整合 / AI    | `skills/trip_briefing.py`| Gemini 2.5 Flash (`langchain-google-genai`) |
+| sz-hong | Agent 後端與前端 UI| `main.py`, `templates/`| Flask + Vanilla HTML/CSS/JS          |
 
 ---
 
 ## 專案架構
 
-```
+```text
 ├── tools/
 │   ├── instructions.md     # 給各小組成員的實作規範說明
 │   ├── weather_tool.py
@@ -43,9 +44,12 @@
 │   ├── trivia_tool.py
 │   └── advice_tool.py
 ├── skills/
-│   └── trip_briefing.py    # 組合各個工具產出行前簡報的邏輯
-├── main.py                 # Streamlit Web UI 主程式
-├── requirements.txt        # 專案相依套件清單
+│   └── trip_briefing.py    # 組合各個工具產出 JSON，並交給 Gemini 潤飾
+├── templates/
+│   └── index.html          # Web 前端介面（純 HTML/CSS/JS 實作質感介面）
+├── main.py                 # Flask 後端應用程式與 API 端點
+├── .env.sample             # Gemini API Key 環境變數範本
+├── requirements.txt        # 專案相依套件清單 (flask, langchain, google-genai...)
 └── README.md
 ```
 
@@ -56,18 +60,22 @@
 請開啟終端機，執行以下指令：
 
 ```bash
-# 建立虛擬環境
-python3 -m venv .venv
-
-# 啟動虛擬環境 (Windows 請執行: .venv\Scripts\activate)
+# 1. 建立並啟動虛擬環境 (Windows 請執行: .venv\Scripts\activate)
+python -m venv .venv
 source .venv/bin/activate
 
-# 安裝套件
+# 2. 安裝套件
 pip install -r requirements.txt
 
-# 執行 Web App
-streamlit run main.py
+# 3. 設定 API Key
+# 請將 .env.sample 複製一份並重新命名為 .env，然後填寫你的 GEMINI_API_KEY
+cp .env.sample .env
+
+# 4. 執行 Web App
+python main.py
 ```
+
+> 🔔 啟動後，請開啟瀏覽器前往：`http://127.0.0.1:5000` 即可開始使用！
 
 ---
 
@@ -124,10 +132,10 @@ TOOL = {
 - **執行順序**：
 
 ```
-Step 1: 呼叫 weather_tool → 取得天氣資訊
-Step 2: 呼叫 search_tool  → 取得景點、美食建議與穿搭建議
-Step 3: 呼叫其它 API 工具 → 取得當地活動、冷知識與旅行格言
-Step 4: 組合上述所有輸出 → 產生一份完整的 markdown 「行前簡報」並傳回
+Step 1: 呼叫 weather_tool / search_tool / 其它額外 API 工具，取得原始資料（包含英文）。
+Step 2: 將全部收集到的純文字/JSON 組合進 Prompt 中。
+Step 3: 呼叫 Gemini 2.5 Flash 語言模型，要求模型擔任導遊，翻譯並將隨機資料在地化（例如隨機出現「參觀博物館」，Gemini 會包裝為「去羅浮宮走走」）。
+Step 4: 規定 Gemini 輸出指定格式的 JSON 字典，供前端網頁逐區塊展開渲染。
 ```
 
 ---
