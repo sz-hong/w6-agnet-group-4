@@ -6,8 +6,13 @@ def get_random_advice() -> str:
     功能：呼叫 https://api.adviceslip.com/advice 取得旅行格言/人生建議。
     回傳：一句隨機建議字串。
     """
-    # TODO: 實作抓取邏輯
-    return "（請實作 advice_tool 呼叫 API 取得隨機建議）"
+    try:
+        response = requests.get("https://api.adviceslip.com/advice", timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        return data.get("slip", {}).get("advice", "保持一顆開放的心，旅行就會處處充滿驚喜！")
+    except Exception:
+        return "保持一顆開放的心，旅行就會處處充滿驚喜！"
 
 TOOL = {
     "name": "advice_tool",
