@@ -1,4 +1,9 @@
 from typing import Dict, Any
+import warnings
+
+# 忽略因為套件改名 (`ddgs`) 而產生的 RuntimeWarning
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="duckduckgo_search")
+
 from duckduckgo_search import DDGS
 
 def _perform_search(query: str, max_results: int = 3) -> str:

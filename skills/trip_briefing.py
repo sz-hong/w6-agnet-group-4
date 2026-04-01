@@ -29,7 +29,7 @@ except ImportError:
 try:
     from tools.trivia_tool import get_random_trivia
 except ImportError:
-    get_random_trivia = lambda: "（尚未實作 trivia_tool）"
+    get_random_trivia = lambda city: "（尚未實作 trivia_tool）"
 
 try:
     from tools.advice_tool import get_random_advice
@@ -78,7 +78,7 @@ def generate_briefing_data(city: str) -> dict:
     raw_food = search_food(city)
     raw_outfit = search_outfit(city)
     raw_activity = get_random_activity()
-    raw_trivia = get_random_trivia()
+    raw_trivia = get_random_trivia(city)
     raw_advice = get_random_advice()
 
     # 2. 如果沒有設定好 LLM 或是 Key 不正確，退回原本直接顯示的行為
