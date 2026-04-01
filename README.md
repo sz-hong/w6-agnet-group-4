@@ -11,13 +11,13 @@
 
 | 使用者輸入   | Agent 行為                             | 負責組員 |
 | ------------ | -------------------------------------- | -------- |
-| （例：天氣） | 呼叫 weather_tool，查詢即時天氣        |          |
-| （例：景點） | 呼叫 search_tool，搜尋熱門景點與美食   |          |
-| （例：建議） | 呼叫 advice_tool，取得隨機旅行建議     |          |
-| （例：活動） | 呼叫 bored_tool，取得打發時間的活動    |          |
-| （例：知識） | 呼叫 trivia_tool，取得旅遊冷知識       |          |
-| （大腦綜合） | 送入 Gemini 模型進行翻譯與在地化推薦   |          |
-| （前端顯示） | 透過 Flask API 渲染至專屬網頁介面      | sz-hong  |
+| （例：天氣） | 呼叫 weather_tool，查詢即時天氣        |   陳柏宇 |
+| （例：景點） | 呼叫 search_tool，搜尋熱門景點與美食   |   楊承軒   |
+| （例：建議） | 呼叫 advice_tool，取得隨機旅行建議     |     陳婉榕     |
+| （例：活動） | 呼叫 bored_tool，取得打發時間的活動    |     陳婉榕     |
+| （例：知識） | 呼叫 trivia_tool，取得旅遊冷知識       |     陳婉榕     |
+| （大腦綜合） | 送入 Gemini 模型進行翻譯與在地化推薦   | 洪紹禎 |
+| （前端顯示） | 透過 Flask API 渲染至專屬網頁介面      | 洪紹禎 |
 
 ---
 
@@ -25,11 +25,11 @@
 
 | 姓名 | 負責功能           | 檔案                  | 使用的技術 / API                       |
 | ---- | ----------------- | --------------------- | ------------------------------------ |
-|      | weather_tool      | `tools/weather_tool.py` | `wttr.in`                          |
-|      | search_tool       | `tools/search_tool.py`  | DuckDuckGo Search API                |
-|      | bored/trivia/advice | `tools/*.py`          | Bored/UselessFacts/Advice API        |
-|      | Skill 整合 / AI    | `skills/trip_briefing.py`| Gemini 2.5 Flash (`langchain-google-genai`) |
-| sz-hong | Agent 後端與前端 UI| `main.py`, `templates/`| Flask + Vanilla HTML/CSS/JS          |
+| 陳柏宇 | weather_tool      | `tools/weather_tool.py` | `wttr.in`                          |
+| 楊承軒 | search_tool       | `tools/search_tool.py`  | DuckDuckGo Search API                |
+| 陳婉榕 | bored/trivia/advice | `tools/*.py`          | Bored/UselessFacts/Advice API        |
+| 洪紹禎 | Skill 整合 / AI    | `skills/trip_briefing.py`| Gemini 2.5 Flash (`langchain-google-genai`) |
+| 洪紹禎 | Agent 後端與前端 UI| `main.py`, `templates/`| Flask + Vanilla HTML/CSS/JS          |
 
 ---
 
@@ -81,17 +81,19 @@ python main.py
 
 ## 執行結果
 
-> 貼上程式執行的實際範例輸出
+> 實際的「旅遊前哨站」行前簡報生成畫面（結合了所有 API 工具、並由 Gemini 2.5 潤飾後端資料、且具備全新的前端質感設計）：
 
-```
-（貼上執行結果，例如下的指令與輸出結果）
-```
+**網頁首頁介面**
+![首頁設計](assets/homepage.png)
+
+**填入城市（如：Paris) 後產生的精美簡報卡片**
+![執行結果卡片](assets/paris_results.png)
 
 ---
 
 ## 各功能說明
 
-### 天氣查詢（負責：姓名）
+### 天氣查詢（負責：陳柏宇）
 
 - **Tool 名稱**：weather_tool
 - **使用 API**：`https://wttr.in/{city}?format=j1`
@@ -112,21 +114,21 @@ TOOL = {
 }
 ```
 
-### 景點與美食搜尋（負責：姓名）
+### 景點與美食搜尋（負責：楊承軒）
 
 - **Tool 名稱**：search_tool
 - **使用 API**：`duckduckgo-search` 套件
 - **輸入**：搜尋關鍵字（例如 "{city} 景點", "{city} 必吃美食"）
 - **輸出範例**：`[{ "title": "...", "href": "...", "body": "..." }]`
 
-### 活動與建議（負責：姓名）
+### 活動與建議（負責：陳婉榕）
 
 - **Tool 名稱**：bored_tool / trivia_tool / advice_tool
 - **使用 API**：Bored API, UselessFacts API, Advice Slip API
 - **輸入**：無（或簡單參數）
 - **輸出範例**：傳回字串或字典，例如：`"Learn how to write in shorthand. (類型: education)"`
 
-### Skill：行前簡報整合（負責：姓名）
+### Skill：行前簡報整合（負責：洪紹禎）
 
 - **組合了哪些 Tool**：`weather_tool`, `search_tool`, `bored_tool`, `trivia_tool`, `advice_tool`
 - **執行順序**：
